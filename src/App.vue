@@ -13,7 +13,6 @@ const invoiceData = ref({
   invoiceNumber: '',
   date: new Date().toISOString().split('T')[0],
   dueDate: getDueDate(14),
-  supplyDate: '',
   company: {
     name: 'Svitlana Yavorska',
     address: '6846DX, Arnhem, Nederland',
@@ -306,7 +305,6 @@ const resetForm = () => {
       invoiceData.value.invoiceNumber = ''
       invoiceData.value.date = new Date().toISOString().split('T')[0]
       invoiceData.value.dueDate = getDueDate(14)
-      invoiceData.value.supplyDate = ''
       invoiceData.value.client = { name: '', address: '', kvk: '', vat: '', iban: '', email: '', phone: '' }
       selectedClientName.value = ''
       invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 1, price: 22, btwRate: 21 } ]
@@ -372,10 +370,6 @@ const loadInvoice = (invoice) => {
             <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
               <span class="text-gray-500 w-32 font-medium sm:font-normal">Vervaldatum:</span>
               <input v-model="invoiceData.dueDate" type="date" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
-            </div>
-            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-              <span class="text-gray-500 w-32 font-medium sm:font-normal">Leveringsdatum:</span>
-              <input v-model="invoiceData.supplyDate" type="date" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
             </div>
           </div>
         </div>
