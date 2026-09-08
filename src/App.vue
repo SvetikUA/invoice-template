@@ -267,17 +267,36 @@ const saveToSupabase = async () => {
   await saveItemsToServer()
 
   try {
-    const { data, error } = await supabase
+    const { data: existing, error: fetchError } = await supabase
       .from('invoices')
-      .insert([
-        {
-          invoice_number: invoiceData.value.invoiceNumber,
+      .select('id')
+      .eq('invoice_number', invoiceData.value.invoiceNumber)
+      .maybeSingle()
+
+    if (fetchError) throw fetchError
+
+    if (existing) {
+      const { error } = await supabase
+        .from('invoices')
+        .update({
           data: invoiceData.value,
           total: grandTotal.value
-        }
-      ])
+        })
+        .eq('id', existing.id)
+      if (error) throw error
+    } else {
+      const { error } = await supabase
+        .from('invoices')
+        .insert([
+          {
+            invoice_number: invoiceData.value.invoiceNumber,
+            data: invoiceData.value,
+            total: grandTotal.value
+          }
+        ])
+      if (error) throw error
+    }
 
-    if (error) throw error
     return true
   } catch (error) {
     console.error('Error saving to Supabase:', error.message)
@@ -304,13 +323,6 @@ const sendToEmail = async () => {
   const subject = encodeURIComponent(`Factuur ${invoiceData.value.invoiceNumber}`)
   const body = encodeURIComponent(`Beste klant,\n\nHierbij stuur ik u de factuur ${invoiceData.value.invoiceNumber} voor een bedrag van ${formatCurrency(grandTotal.value)}.\n\nMet vriendelijke groet,\n${invoiceData.value.company.name}`)
   window.location.href = `mailto:?subject=${subject}&body=${body}`
-  showModal.value = false
-}
-
-const sendToMessenger = async () => {
-  await saveToSupabase()
-  const text = encodeURIComponent(`Beste klant, hierbij stuur ik u de factuur ${invoiceData.value.invoiceNumber} voor een bedrag van ${formatCurrency(grandTotal.value)}.\n\nMet vriendelijke groet, ${invoiceData.value.company.name}`)
-  window.open(`https://wa.me/?text=${text}`, '_blank')
   showModal.value = false
 }
 
@@ -668,17 +680,6 @@ const loadInvoice = (invoice) => {
                 </svg>
               </div>
               <span class="font-medium text-gray-700">Versturen via e-mail</span>
-            </div>
-          </button>
-
-          <button @click="sendToMessenger" :disabled="isSaving" class="flex items-center justify-between w-full p-4 border border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-colors group">
-            <div class="flex items-center gap-3">
-              <div class="bg-purple-100 p-2 rounded-lg text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </div>
-              <span class="font-medium text-gray-700">Versturen via WhatsApp</span>
             </div>
           </button>
         </div>
