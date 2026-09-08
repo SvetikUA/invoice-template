@@ -556,7 +556,7 @@ const loadInvoice = (invoice) => {
               <td class="p-2">
                 <div class="relative w-full flex items-center">
                   <span class="absolute left-2 text-gray-500 font-medium">€</span>
-                  <input v-model.number="item.price" type="number" min="0" step="0.01" placeholder="22" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && (item.price === '' || item.price < 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded pl-6 pr-2 py-1 bg-transparent" />
+                  <input v-model.number="item.price" type="number" min="0" step="0.01" placeholder="23,5" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && (item.price === '' || item.price < 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded pl-6 pr-2 py-1 bg-transparent" />
                 </div>
               </td>
               <td class="p-2">
