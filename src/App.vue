@@ -344,7 +344,7 @@ const resetForm = () => {
       invoiceData.value.dueDate = getDueDate(14)
       invoiceData.value.client = { name: '', address: '', kvk: '', vat: '', iban: '', email: '', phone: '' }
       selectedClientName.value = ''
-      invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 0, price: 23,5, btwRate: 21 } ]
+      invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 0, price: 23.5, btwRate: 21 } ]
       showErrors.value = false
       generateInvoiceNumber()
     }
