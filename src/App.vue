@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { supabase } from './supabase'
 
 // Invoice state
@@ -67,11 +67,24 @@ onMounted(() => {
   fetchServerData()
 })
 
+const resizeAllTextareas = () => {
+  nextTick(() => {
+    document.querySelectorAll('textarea').forEach(el => {
+      el.style.height = 'auto'
+      el.style.height = el.scrollHeight + 'px'
+    })
+  })
+}
+
 const resizeTextarea = (event) => {
   const el = event.target
   el.style.height = 'auto'
   el.style.height = el.scrollHeight + 'px'
 }
+
+watch(() => invoiceData.value, () => {
+  resizeAllTextareas()
+}, { deep: true })
 
 // Clients storage on server
 const savedClients = ref([])
