@@ -147,13 +147,71 @@ const sendToMessenger = async () => {
   showModal.value = false
 }
 
+const confirmModal = ref({
+  isOpen: false,
+  title: '',
+  message: '',
+  onConfirm: null
+})
+
+const openConfirm = (title, message, onConfirm) => {
+  confirmModal.value = { isOpen: true, title, message, onConfirm }
+}
+
+const closeConfirm = () => {
+  confirmModal.value.isOpen = false
+}
+
+const confirmAction = () => {
+  if (confirmModal.value.onConfirm) confirmModal.value.onConfirm()
+  closeConfirm()
+}
+
 const resetForm = () => {
-  if (confirm('Wilt u een nieuwe factuur maken? (Бажаєте очистити форму для нового інвойсу? Дані вашої компанії залишаться).')) {
-    invoiceData.value.invoiceNumber = ''
-    invoiceData.value.date = new Date().toISOString().split('T')[0]
-    invoiceData.value.client = { name: '', address: '' }
-    invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 1, price: 0, btwRate: 21 } ]
+  openConfirm(
+    'Nieuwe factuur maken',
+    'Wilt u een nieuwe factuur maken?',
+    () => {
+      invoiceData.value.invoiceNumber = ''
+      invoiceData.value.date = new Date().toISOString().split('T')[0]
+      invoiceData.value.client = { name: '', address: '' }
+      invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 1, price: 0, btwRate: 21 } ]
+    }
+  )
+}
+
+// History logic
+const showHistory = ref(false)
+const isLoadingHistory = ref(false)
+const invoicesHistory = ref([])
+
+const fetchHistory = async () => {
+  isLoadingHistory.value = true
+  showHistory.value = true
+  try {
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    invoicesHistory.value = data
+  } catch (error) {
+    console.error('Error fetching history:', error)
+    alert('Fout bij ophalen geschiedenis: ' + error.message)
+  } finally {
+    isLoadingHistory.value = false
   }
+}
+
+const loadInvoice = (invoice) => {
+  openConfirm(
+    'Oude factuur laden',
+    'Huidige gegevens worden overschreven. Doorgaan?',
+    () => {
+      invoiceData.value = JSON.parse(JSON.stringify(invoice.data))
+      showHistory.value = false
+    }
+  )
 }
 </script>
 
@@ -272,8 +330,11 @@ const resetForm = () => {
 
     <!-- Action Buttons (Not printed) -->
     <div class="mx-auto max-w-4xl mt-8 flex justify-end gap-4 print:hidden">
+      <button @click="fetchHistory" class="bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 font-semibold py-3 px-8 rounded-xl shadow-sm transition-colors mr-auto">
+        Factuurgeschiedenis
+      </button>
       <button @click="resetForm" class="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 font-semibold py-3 px-8 rounded-xl shadow-sm transition-colors">
-        Nieuwe factuur (Очистити)
+        Nieuwe factuur
       </button>
       <button @click="openModal" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
         Factuur opslaan
@@ -281,7 +342,7 @@ const resetForm = () => {
     </div>
 
     <!-- Validation Modal Overlay -->
-    <div v-if="showValidationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div v-if="showValidationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden">
       <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all text-center">
         <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
           <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -341,6 +402,56 @@ const resetForm = () => {
               </div>
               <span class="font-medium text-gray-700">Versturen via WhatsApp</span>
             </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Sidebar Overlay -->
+    <div v-if="showHistory" class="fixed inset-0 z-50 overflow-hidden print:hidden">
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" @click="showHistory = false"></div>
+      <div class="fixed inset-y-0 right-0 max-w-md w-full flex">
+        <div class="w-full h-full bg-white shadow-2xl flex flex-col">
+          <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+            <h2 class="text-xl font-bold text-gray-800">Factuurgeschiedenis</h2>
+            <button @click="showHistory = false" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+          </div>
+          <div class="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+            <div v-if="isLoadingHistory" class="text-center text-gray-500 py-8">Laden... (Завантаження...)</div>
+            <div v-else-if="invoicesHistory.length === 0" class="text-center text-gray-500 py-8">Geen facturen gevonden. (Інвойсів не знайдено)</div>
+            <div v-else class="flex flex-col gap-3">
+              <div v-for="inv in invoicesHistory" :key="inv.id" @click="loadInvoice(inv)" class="p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md cursor-pointer transition-all bg-white group">
+                <div class="flex justify-between items-start mb-2">
+                  <span class="font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{{ inv.invoice_number || 'N/A' }}</span>
+                  <span class="text-sm font-bold text-green-600">{{ formatCurrency(inv.total) }}</span>
+                </div>
+                <div class="text-sm text-gray-500 flex justify-between">
+                  <span>{{ new Date(inv.created_at).toLocaleDateString('nl-NL') }}</span>
+                  <span class="truncate ml-4 max-w-[150px]">{{ inv.data?.client?.name || 'Onbekend' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Modal Overlay -->
+    <div v-if="confirmModal.isOpen" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all text-center relative">
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+          <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ confirmModal.title }}</h3>
+        <p class="text-sm text-gray-500 mb-6">{{ confirmModal.message }}</p>
+        <div class="flex gap-3">
+          <button @click="closeConfirm" class="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none transition-colors">
+            Cancel
+          </button>
+          <button @click="confirmAction" class="flex-1 rounded-xl border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none transition-colors">
+            OK
           </button>
         </div>
       </div>
