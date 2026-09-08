@@ -80,7 +80,7 @@ const selectedClientName = ref('')
 const selectClient = () => {
   const client = savedClients.value.find(c => c.name === selectedClientName.value)
   if (client) {
-    invoiceData.value.client = { 
+    invoiceData.value.client = {
       name: client.name || '',
       address: client.address || '',
       kvk: client.kvk || '',
@@ -120,7 +120,7 @@ const saveClientToServer = async () => {
 
   const existingIndex = savedClients.value.findIndex(c => c.name === client.name)
   const clientData = { ...client }
-  
+
   if (existingIndex >= 0) {
     const id = savedClients.value[existingIndex].id
     if (id) await supabase.from('clients').update(clientData).eq('id', id)
@@ -344,7 +344,7 @@ const resetForm = () => {
       invoiceData.value.dueDate = getDueDate(14)
       invoiceData.value.client = { name: '', address: '', kvk: '', vat: '', iban: '', email: '', phone: '' }
       selectedClientName.value = ''
-      invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 1, price: 22, btwRate: 21 } ]
+      invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 0, price: 23,5, btwRate: 21 } ]
       showErrors.value = false
       generateInvoiceNumber()
     }
