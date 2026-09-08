@@ -447,7 +447,8 @@ const loadInvoice = (invoice) => {
 
             <div class="grid grid-cols-[50px_1fr] items-start gap-2">
               <span class="text-sm text-gray-500 mt-2 print:mt-1">Adres:</span>
-              <textarea v-model="invoiceData.company.address" @input="resizeTextarea" placeholder="Volledig adres" rows="1" style="overflow: hidden; height: auto;" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.address}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent resize-none min-h-[40px]"></textarea>
+              <div class="w-full px-3 py-2 print:py-1 hidden print:block whitespace-pre-wrap">{{ invoiceData.company.address }}</div>
+              <textarea v-model="invoiceData.company.address" @input="resizeTextarea" placeholder="Volledig adres" rows="1" style="overflow: hidden; height: auto;" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.address}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:hidden bg-transparent resize-none min-h-[40px]"></textarea>
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
@@ -530,7 +531,8 @@ const loadInvoice = (invoice) => {
 
             <div class="grid grid-cols-[50px_1fr] items-start gap-2" :class="{'print:hidden': !invoiceData.client.address}">
               <span class="text-sm text-gray-500 mt-2 print:mt-1">Adres:</span>
-              <textarea v-model="invoiceData.client.address" @input="resizeTextarea" placeholder="Volledig adres (optioneel)" rows="1" style="overflow: hidden; height: auto;" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent resize-none min-h-[40px]"></textarea>
+              <div class="w-full px-3 py-2 print:py-1 hidden print:block whitespace-pre-wrap">{{ invoiceData.client.address }}</div>
+              <textarea v-model="invoiceData.client.address" @input="resizeTextarea" placeholder="Volledig adres (optioneel)" rows="1" style="overflow: hidden; height: auto;" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:hidden bg-transparent resize-none min-h-[40px]"></textarea>
             </div>
           </div>
         </div>
