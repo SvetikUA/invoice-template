@@ -425,11 +425,17 @@ const loadInvoice = (invoice) => {
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
               <span class="text-gray-500 w-32 font-medium sm:font-normal">Factuurdatum:</span>
-              <input v-model="invoiceData.date" type="date" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.date}" class="focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
+              <div class="relative flex-1 sm:flex-none flex items-center max-w-fit">
+                <input v-model="invoiceData.date" type="date" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.date}" class="focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-transparent pr-7 z-10" />
+                <svg class="w-4 h-4 text-gray-400 absolute right-1 z-0 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              </div>
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
               <span class="text-gray-500 w-32 font-medium sm:font-normal">Vervaldatum:</span>
-              <input v-model="invoiceData.dueDate" type="date" class="focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
+              <div class="relative flex-1 sm:flex-none flex items-center max-w-fit">
+                <input v-model="invoiceData.dueDate" type="date" class="focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-transparent pr-7 z-10" />
+                <svg class="w-4 h-4 text-gray-400 absolute right-1 z-0 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              </div>
             </div>
           </div>
         </div>
@@ -448,7 +454,7 @@ const loadInvoice = (invoice) => {
             <div class="grid grid-cols-[50px_1fr] items-start gap-2">
               <span class="text-sm text-gray-500 mt-2 print:mt-1">Adres:</span>
               <div class="w-full px-3 py-2 print:py-1 hidden print:block whitespace-pre-wrap">{{ invoiceData.company.address }}</div>
-              <textarea v-model="invoiceData.company.address" @input="resizeTextarea" placeholder="Volledig adres" rows="1" style="overflow: hidden; height: auto;" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.address}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:hidden bg-transparent resize-none min-h-[40px]"></textarea>
+              <textarea v-model="invoiceData.company.address" @input="resizeTextarea" placeholder="Volledig adres" rows="1" style="overflow: hidden; height: auto;" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.address}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:hidden bg-transparent resize-none min-h-10"></textarea>
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
@@ -532,16 +538,16 @@ const loadInvoice = (invoice) => {
             <div class="grid grid-cols-[50px_1fr] items-start gap-2" :class="{'print:hidden': !invoiceData.client.address}">
               <span class="text-sm text-gray-500 mt-2 print:mt-1">Adres:</span>
               <div class="w-full px-3 py-2 print:py-1 hidden print:block whitespace-pre-wrap">{{ invoiceData.client.address }}</div>
-              <textarea v-model="invoiceData.client.address" @input="resizeTextarea" placeholder="Volledig adres (optioneel)" rows="1" style="overflow: hidden; height: auto;" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:hidden bg-transparent resize-none min-h-[40px]"></textarea>
+              <textarea v-model="invoiceData.client.address" @input="resizeTextarea" placeholder="Volledig adres (optioneel)" rows="1" style="overflow: hidden; height: auto;" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:hidden bg-transparent resize-none min-h-10"></textarea>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Items Table -->
-      <div class="overflow-hidden">
-        <div class="mb-12 print:mb-6 overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
-        <table class="w-full text-left border-collapse min-w-150">
+      <div>
+        <div class="mb-12 print:mb-6 overflow-x-auto md:overflow-visible -mx-6 px-6 md:mx-0 md:px-0">
+        <table class="w-full text-left border-collapse min-w-150 md:min-w-full">
           <thead>
             <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
               <th class="p-4 rounded-tl-lg">Omschrijving</th>
@@ -561,23 +567,23 @@ const loadInvoice = (invoice) => {
                     <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': openItemDropdownId === item.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                   </button>
 
-                  <div v-if="openItemDropdownId === item.id" class="absolute z-30 w-72 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden left-0 print:hidden">
-                    <button @click.stop="saveCurrentItemAsTemplate(item)" class="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 border-b border-gray-100 transition-colors font-medium flex items-center gap-2">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                  <div v-if="openItemDropdownId === item.id" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] max-w-sm bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden md:absolute md:top-auto md:left-0 md:translate-x-0 md:translate-y-0 md:w-72 md:mt-1 md:shadow-xl md:border-gray-100 print:hidden">
+                    <button @click.stop="saveCurrentItemAsTemplate(item)" class="w-full text-left px-4 md:px-3 py-4 md:py-2 text-base md:text-sm text-blue-600 hover:bg-blue-50 border-b border-gray-100 transition-colors font-medium flex items-center gap-2">
+                      <svg class="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
                       Opslaan als nieuw sjabloon
                     </button>
-                    <div class="max-h-48 overflow-y-auto py-1">
-                      <div v-for="si in savedItems" :key="si.description" class="flex items-center justify-between px-2 py-1 hover:bg-blue-50 group transition-colors">
-                        <button @click="selectSavedItem(item, si)" class="text-left text-sm text-gray-800 font-medium truncate flex-1 px-2 py-1">{{ si.description }}</button>
-                        <button @click.stop="deleteSavedItem(si.description)" class="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-100 transition-colors" title="Verwijderen">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    <div class="max-h-[50vh] md:max-h-48 overflow-y-auto py-1">
+                      <div v-for="si in savedItems" :key="si.description" class="flex items-center justify-between px-3 md:px-2 py-3 md:py-1 hover:bg-blue-50 group transition-colors border-b border-gray-50 md:border-none">
+                        <button @click="selectSavedItem(item, si)" class="text-left text-base md:text-sm text-gray-800 font-medium truncate flex-1 px-2 py-1">{{ si.description }}</button>
+                        <button @click.stop="deleteSavedItem(si.description)" class="text-red-400 hover:text-red-600 p-2 md:p-1 rounded hover:bg-red-100 transition-colors" title="Verwijderen">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-4 md:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
                       </div>
-                      <div v-if="savedItems.length === 0" class="px-4 py-3 text-sm text-gray-500 italic text-center">Geen opgeslagen diensten.</div>
+                      <div v-if="savedItems.length === 0" class="px-4 py-4 text-base md:text-sm text-gray-500 italic text-center">Geen opgeslagen diensten.</div>
                     </div>
                   </div>
                 </div>
-                <div v-if="openItemDropdownId === item.id" @click="openItemDropdownId = null" class="fixed inset-0 z-20 print:hidden"></div>
+                <div v-if="openItemDropdownId === item.id" @click="openItemDropdownId = null" class="fixed inset-0 z-40 bg-black/50 md:bg-transparent print:hidden"></div>
               </td>
               <td class="p-2">
                 <input v-model.number="item.quantity" type="number" min="1" step="0.1" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && (!item.quantity || item.quantity <= 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
@@ -612,7 +618,7 @@ const loadInvoice = (invoice) => {
       </div>
 
       <!-- Totals -->
-      <div class="flex justify-end mb-8 print:mb-4">
+      <div class="flex justify-end mb-8 print:mb-4 relative z-0">
         <div class="w-full sm:w-80 bg-gray-50 p-6 rounded-xl">
           <div class="flex justify-between mb-2 text-gray-600">
             <span>Subtotaal (excl. BTW):</span>
