@@ -32,7 +32,7 @@ const invoiceData = ref({
     phone: ''
   },
   items: [
-    { id: 1, description: '', quantity: 1, price: '', btwRate: 21 }
+    { id: 1, description: '', quantity: 0, price: 23.5, btwRate: 21 }
   ]
 })
 
@@ -112,6 +112,41 @@ const saveClientLocally = () => {
   localStorage.setItem('savedClients', JSON.stringify(savedClients.value))
 }
 
+// Items storage in localStorage
+const savedItems = ref(JSON.parse(localStorage.getItem('savedItems') || '[]'))
+const openItemDropdownId = ref(null)
+
+const toggleItemDropdown = (id) => {
+  openItemDropdownId.value = openItemDropdownId.value === id ? null : id
+}
+
+const selectSavedItem = (targetItem, savedItem) => {
+  targetItem.description = savedItem.description
+  openItemDropdownId.value = null
+}
+
+const deleteSavedItem = (description) => {
+  openConfirm(
+    'Dienst verwijderen',
+    'Weet je zeker dat je deze dienst wilt verwijderen?',
+    () => {
+      savedItems.value = savedItems.value.filter(i => i.description !== description)
+      localStorage.setItem('savedItems', JSON.stringify(savedItems.value))
+    }
+  )
+}
+
+const saveItemsLocally = () => {
+  invoiceData.value.items.forEach(item => {
+    if (!item.description) return
+    const existingIndex = savedItems.value.findIndex(i => i.description === item.description)
+    if (existingIndex < 0) {
+      savedItems.value.push({ description: item.description })
+    }
+  })
+  localStorage.setItem('savedItems', JSON.stringify(savedItems.value))
+}
+
 // BTW rates available
 const btwRates = [21, 9, 0]
 
@@ -121,7 +156,7 @@ const addItem = () => {
     id: Date.now(),
     description: '',
     quantity: 1,
-    price: '',
+    price: 22,
     btwRate: 21
   })
 }
@@ -193,6 +228,7 @@ const openModal = () => {
 const saveToSupabase = async () => {
   isSaving.value = true
   saveClientLocally() // Save client to local storage
+  saveItemsLocally() // Save items to local storage
 
   try {
     const { data, error } = await supabase
@@ -273,7 +309,7 @@ const resetForm = () => {
       invoiceData.value.supplyDate = ''
       invoiceData.value.client = { name: '', address: '', kvk: '', vat: '', iban: '', email: '', phone: '' }
       selectedClientName.value = ''
-      invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 1, price: '', btwRate: 21 } ]
+      invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 1, price: 22, btwRate: 21 } ]
       showErrors.value = false
       generateInvoiceNumber()
     }
@@ -461,15 +497,36 @@ const loadInvoice = (invoice) => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in invoiceData.items" :key="item.id" class="border-b border-gray-100 hover:bg-gray-50 transition-colors print:text-sm">
-              <td class="p-2">
-                <input v-model="item.description" type="text" placeholder="Omschrijving" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !item.description}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 print:py-0 bg-transparent" />
+            <tr v-for="item in invoiceData.items" :key="item.id" class="border-b border-gray-100 hover:bg-gray-50 transition-colors print:text-sm relative">
+              <td class="p-2 relative">
+                <div class="relative w-full">
+                  <input v-model="item.description" type="text" placeholder="Omschrijving" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !item.description}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 print:py-0 bg-transparent pr-8" />
+                  <button @click="toggleItemDropdown(item.id)" class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 p-1 print:hidden" title="Opgeslagen diensten">
+                    <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': openItemDropdownId === item.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </button>
+
+                  <div v-if="openItemDropdownId === item.id" class="absolute z-30 w-72 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden left-0 print:hidden">
+                    <div class="max-h-48 overflow-y-auto py-1">
+                      <div v-for="si in savedItems" :key="si.description" class="flex items-center justify-between px-2 py-1 hover:bg-blue-50 group transition-colors">
+                        <button @click="selectSavedItem(item, si)" class="text-left text-sm text-gray-800 font-medium truncate flex-1 px-2 py-1">{{ si.description }}</button>
+                        <button @click.stop="deleteSavedItem(si.description)" class="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-100 transition-colors" title="Verwijderen">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
+                      <div v-if="savedItems.length === 0" class="px-4 py-3 text-sm text-gray-500 italic text-center">Geen opgeslagen diensten. <br/><span class="text-xs">Ze worden automatisch opgeslagen.</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="openItemDropdownId === item.id" @click="openItemDropdownId = null" class="fixed inset-0 z-20 print:hidden"></div>
               </td>
               <td class="p-2">
                 <input v-model.number="item.quantity" type="number" min="1" step="0.1" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && (!item.quantity || item.quantity <= 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
               </td>
               <td class="p-2">
-                <input v-model.number="item.price" type="number" min="0" step="0.01" placeholder="0" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && (item.price === '' || item.price < 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
+                <div class="relative w-full flex items-center">
+                  <span class="absolute left-2 text-gray-500 font-medium">€</span>
+                  <input v-model.number="item.price" type="number" min="0" step="0.01" placeholder="22" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && (item.price === '' || item.price < 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded pl-6 pr-2 py-1 bg-transparent" />
+                </div>
               </td>
               <td class="p-2">
                 <select v-model.number="item.btwRate" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent">
