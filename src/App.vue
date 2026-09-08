@@ -1,25 +1,92 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { supabase } from './supabase'
 
 // Invoice state
+const getDueDate = (days = 14) => {
+  const d = new Date()
+  d.setDate(d.getDate() + days)
+  return d.toISOString().split('T')[0]
+}
+
 const invoiceData = ref({
   invoiceNumber: '',
   date: new Date().toISOString().split('T')[0],
+  dueDate: getDueDate(14),
+  supplyDate: '',
   company: {
-    name: '',
-    address: '',
-    kvk: '',
-    btw: ''
+    name: 'Svitlana Yavorska',
+    address: '6846DX, Arnhem, Nederland',
+    kvk: '99639084',
+    btw: 'NL005400318B31',
+    iban: 'NL79 SNSB 8838 8111 05',
+    phone: '+31645038043'
   },
   client: {
     name: '',
+    vat: '',
+    email: '',
     address: ''
   },
   items: [
-    { id: 1, description: '', quantity: 1, price: 0, btwRate: 21 }
+    { id: 1, description: '', quantity: 1, price: '', btwRate: 21 }
   ]
 })
+
+const generateInvoiceNumber = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('invoice_number')
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    if (data && data.length > 0 && data[0].invoice_number) {
+      const lastNumberStr = data[0].invoice_number;
+      const match = lastNumberStr.match(/\d+$/);
+      if (match) {
+        const nextNum = parseInt(match[0], 10) + 1;
+        const padded = nextNum.toString().padStart(match[0].length, '0');
+        invoiceData.value.invoiceNumber = lastNumberStr.replace(/\d+$/, padded);
+      } else {
+        invoiceData.value.invoiceNumber = lastNumberStr + '-1';
+      }
+    } else {
+      const year = new Date().getFullYear();
+      invoiceData.value.invoiceNumber = `INV-${year}-001`;
+    }
+  } catch (error) {
+    console.error('Could not fetch last invoice number', error)
+  }
+}
+
+onMounted(() => {
+  generateInvoiceNumber()
+})
+
+// Clients storage in localStorage
+const savedClients = ref(JSON.parse(localStorage.getItem('savedClients') || '[]'))
+
+const selectClient = (event) => {
+  const selectedName = event.target.value
+  const client = savedClients.value.find(c => c.name === selectedName)
+  if (client) {
+    invoiceData.value.client = { ...client }
+  }
+}
+
+const saveClientLocally = () => {
+  const client = invoiceData.value.client
+  if (!client.name) return
+  
+  const existingIndex = savedClients.value.findIndex(c => c.name === client.name)
+  if (existingIndex >= 0) {
+    savedClients.value[existingIndex] = { ...client }
+  } else {
+    savedClients.value.push({ ...client })
+  }
+  localStorage.setItem('savedClients', JSON.stringify(savedClients.value))
+}
 
 // BTW rates available
 const btwRates = [21, 9, 0]
@@ -30,7 +97,7 @@ const addItem = () => {
     id: Date.now(),
     description: '',
     quantity: 1,
-    price: 0,
+    price: '',
     btwRate: 21
   })
 }
@@ -43,13 +110,13 @@ const removeItem = (id) => {
 
 // Calculations
 const subtotal = computed(() => {
-  return invoiceData.value.items.reduce((sum, item) => sum + (item.quantity * item.price), 0)
+  return invoiceData.value.items.reduce((sum, item) => sum + ((item.quantity || 0) * (item.price || 0)), 0)
 })
 
 const btwBreakdown = computed(() => {
   const breakdown = { 21: 0, 9: 0, 0: 0 }
   invoiceData.value.items.forEach(item => {
-    const itemTotal = item.quantity * item.price
+    const itemTotal = (item.quantity || 0) * (item.price || 0)
     breakdown[item.btwRate] += itemTotal * (item.btwRate / 100)
   })
   return breakdown
@@ -73,11 +140,11 @@ const validateForm = () => {
   const kl = invoiceData.value.client
 
   if (!invoiceData.value.invoiceNumber || !invoiceData.value.date) return false
-  if (!c.name || !c.address || !c.kvk || !c.btw) return false
-  if (!kl.name || !kl.address) return false
+  if (!c.name || !c.address || !c.kvk || !c.btw || !c.iban) return false
+  if (!kl.name) return false
 
   for (const item of invoiceData.value.items) {
-    if (!item.description || item.quantity <= 0 || item.price < 0) return false
+    if (!item.description || item.quantity <= 0 || item.price === '' || item.price < 0) return false
   }
 
   return true
@@ -86,18 +153,23 @@ const validateForm = () => {
 // Modal and Saving logic
 const showModal = ref(false)
 const showValidationModal = ref(false)
+const showErrors = ref(false)
 const isSaving = ref(false)
 
 const openModal = () => {
   if (!validateForm()) {
+    showErrors.value = true
     showValidationModal.value = true
     return
   }
+  showErrors.value = false
   showModal.value = true
 }
 
 const saveToSupabase = async () => {
   isSaving.value = true
+  saveClientLocally() // Save client to local storage
+  
   try {
     const { data, error } = await supabase
       .from('invoices')
@@ -174,8 +246,12 @@ const resetForm = () => {
     () => {
       invoiceData.value.invoiceNumber = ''
       invoiceData.value.date = new Date().toISOString().split('T')[0]
-      invoiceData.value.client = { name: '', address: '' }
-      invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 1, price: 0, btwRate: 21 } ]
+      invoiceData.value.dueDate = getDueDate(14)
+      invoiceData.value.supplyDate = ''
+      invoiceData.value.client = { name: '', vat: '', email: '', address: '' }
+      invoiceData.value.items = [ { id: Date.now(), description: '', quantity: 1, price: '', btwRate: 21 } ]
+      showErrors.value = false
+      generateInvoiceNumber()
     }
   )
 }
@@ -218,49 +294,92 @@ const loadInvoice = (invoice) => {
 <template>
   <div class="min-h-screen bg-gray-100 p-8 print:p-0 print:bg-white font-sans text-gray-900">
     <!-- Invoice Container -->
-    <div class="mx-auto max-w-4xl bg-white p-12 print:p-0 print:shadow-none shadow-xl rounded-2xl relative" id="invoice-document">
+    <div class="mx-auto max-w-4xl bg-white p-6 md:p-12 print:p-0 print:shadow-none shadow-xl rounded-2xl relative" id="invoice-document">
 
       <!-- Header -->
-      <div class="flex justify-between items-start border-b border-gray-200 pb-8 mb-8">
-        <div>
+      <div class="flex flex-col md:flex-row justify-between items-start border-b border-gray-200 pb-8 mb-8 gap-6">
+        <div class="w-full">
           <h1 class="text-4xl font-bold text-gray-800 tracking-tight">Factuur</h1>
-          <div class="mt-4 flex flex-col gap-2">
-            <div class="flex items-center gap-4">
-              <span class="text-gray-500 w-32">Factuurnummer:</span>
-              <input v-model="invoiceData.invoiceNumber" type="text" placeholder="INV-2023-001" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <div class="mt-4 flex flex-col gap-3 md:gap-2">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+              <span class="text-gray-500 w-32 font-medium sm:font-normal">Factuurnummer:</span>
+              <input v-model="invoiceData.invoiceNumber" type="text" placeholder="INV-2023-001" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.invoiceNumber}" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
             </div>
-            <div class="flex items-center gap-4">
-              <span class="text-gray-500 w-32">Factuurdatum:</span>
-              <input v-model="invoiceData.date" type="date" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+              <span class="text-gray-500 w-32 font-medium sm:font-normal">Factuurdatum:</span>
+              <input v-model="invoiceData.date" type="date" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.date}" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
+            </div>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+              <span class="text-gray-500 w-32 font-medium sm:font-normal">Vervaldatum:</span>
+              <input v-model="invoiceData.dueDate" type="date" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
+            </div>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+              <span class="text-gray-500 w-32 font-medium sm:font-normal">Leveringsdatum:</span>
+              <input v-model="invoiceData.supplyDate" type="date" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
             </div>
           </div>
         </div>
       </div>
 
       <!-- Addresses -->
-      <div class="flex justify-between gap-12 mb-12">
+      <div class="flex flex-col md:flex-row justify-between gap-6 md:gap-12 mb-12">
         <div class="flex-1 bg-gray-50 p-6 rounded-xl">
           <h3 class="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Van (ZZP)</h3>
           <div class="flex flex-col gap-3">
-            <input v-model="invoiceData.company.name" type="text" placeholder="Bedrijfsnaam / Naam" class="w-full border border-gray-300 rounded px-3 py-2 bg-white" />
-            <textarea v-model="invoiceData.company.address" placeholder="Volledig adres" rows="2" class="w-full border border-gray-300 rounded px-3 py-2 bg-white"></textarea>
-            <input v-model="invoiceData.company.kvk" type="text" placeholder="KVK nummer" class="w-full border border-gray-300 rounded px-3 py-2 bg-white" />
-            <input v-model="invoiceData.company.btw" type="text" placeholder="BTW-id" class="w-full border border-gray-300 rounded px-3 py-2 bg-white" />
+            <input v-model="invoiceData.company.name" type="text" placeholder="Bedrijfsnaam / Naam" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.company.name}" class="w-full border border-gray-300 rounded px-3 py-2 bg-white font-bold" />
+            <textarea v-model="invoiceData.company.address" placeholder="Volledig adres" rows="2" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.company.address}" class="w-full border border-gray-300 rounded px-3 py-2 bg-white resize-none"></textarea>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-500 w-12 print:w-auto print:mr-1">KVK:</span>
+              <input v-model="invoiceData.company.kvk" type="text" placeholder="KVK nummer" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.company.kvk}" class="w-full border border-gray-300 rounded px-3 py-2 bg-white" />
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-500 w-12 print:w-auto print:mr-1">BTW:</span>
+              <input v-model="invoiceData.company.btw" type="text" placeholder="BTW-id" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.company.btw}" class="w-full border border-gray-300 rounded px-3 py-2 bg-white" />
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-500 w-12 print:w-auto print:mr-1">IBAN:</span>
+              <input v-model="invoiceData.company.iban" type="text" placeholder="IBAN" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.company.iban}" class="w-full border border-gray-300 rounded px-3 py-2 bg-white" />
+            </div>
+            
+            <div class="flex items-center gap-2" :class="{'print:hidden': !invoiceData.company.phone}">
+              <span class="text-sm text-gray-500 w-12 print:w-auto print:mr-1">Tel:</span>
+              <input v-model="invoiceData.company.phone" type="text" placeholder="Telefoonnummer" class="w-full border border-gray-300 rounded px-3 py-2 bg-white" />
+            </div>
           </div>
         </div>
 
         <div class="flex-1 bg-blue-50 p-6 rounded-xl">
-          <h3 class="text-lg font-semibold text-blue-800 mb-4 border-b border-blue-200 pb-2">Aan (Klant)</h3>
+          <div class="flex justify-between items-center border-b border-blue-200 pb-2 mb-4">
+            <h3 class="text-lg font-semibold text-blue-800">Aan (Klant)</h3>
+            <select @change="selectClient" class="text-xs border border-blue-300 rounded px-2 py-1 print:hidden bg-white text-blue-800 outline-none w-32" v-if="savedClients.length > 0">
+              <option value="">Kies klant...</option>
+              <option v-for="c in savedClients" :key="c.name" :value="c.name">{{ c.name }}</option>
+            </select>
+          </div>
           <div class="flex flex-col gap-3">
-            <input v-model="invoiceData.client.name" type="text" placeholder="Naam klant / Bedrijf" class="w-full border border-blue-200 rounded px-3 py-2 bg-white" />
-            <textarea v-model="invoiceData.client.address" placeholder="Adres" rows="3" class="w-full border border-blue-200 rounded px-3 py-2 bg-white"></textarea>
+            <input v-model="invoiceData.client.name" type="text" placeholder="Naam klant / Bedrijf" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.client.name}" class="w-full border border-blue-200 rounded px-3 py-2 bg-white font-bold" />
+            
+            <div class="flex items-center gap-2" :class="{'print:hidden': !invoiceData.client.vat}">
+              <span class="text-sm text-blue-600/70 w-12 print:w-auto print:mr-1">BTW:</span>
+              <input v-model="invoiceData.client.vat" type="text" placeholder="BTW-nummer (optioneel)" class="w-full border border-blue-200 rounded px-3 py-2 bg-white" />
+            </div>
+            
+            <div class="flex items-center gap-2" :class="{'print:hidden': !invoiceData.client.email}">
+              <span class="text-sm text-blue-600/70 w-12 print:w-auto print:mr-1">Email:</span>
+              <input v-model="invoiceData.client.email" type="email" placeholder="E-mailadres (optioneel)" class="w-full border border-blue-200 rounded px-3 py-2 bg-white" />
+            </div>
+
+            <textarea v-model="invoiceData.client.address" placeholder="Volledig adres (optioneel)" rows="3" class="w-full border border-blue-200 rounded px-3 py-2 bg-white resize-none"></textarea>
           </div>
         </div>
       </div>
 
       <!-- Items Table -->
-      <div class="mb-12">
-        <table class="w-full text-left border-collapse">
+      <div class="mb-12 overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
+        <table class="w-full text-left border-collapse min-w-[600px]">
           <thead>
             <tr class="bg-gray-100 text-gray-700 text-sm uppercase tracking-wider">
               <th class="p-4 rounded-tl-lg">Omschrijving</th>
@@ -274,13 +393,13 @@ const loadInvoice = (invoice) => {
           <tbody>
             <tr v-for="item in invoiceData.items" :key="item.id" class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
               <td class="p-2">
-                <input v-model="item.description" type="text" placeholder="Omschrijving" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
+                <input v-model="item.description" type="text" placeholder="Omschrijving" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !item.description}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
               </td>
               <td class="p-2">
-                <input v-model.number="item.quantity" type="number" min="1" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
+                <input v-model.number="item.quantity" type="number" min="1" step="0.1" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && (!item.quantity || item.quantity <= 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
               </td>
               <td class="p-2">
-                <input v-model.number="item.price" type="number" min="0" step="0.01" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
+                <input v-model.number="item.price" type="number" min="0" step="0.01" placeholder="0" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && (item.price === '' || item.price < 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
               </td>
               <td class="p-2">
                 <select v-model.number="item.btwRate" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent">
@@ -288,11 +407,11 @@ const loadInvoice = (invoice) => {
                 </select>
               </td>
               <td class="p-2 text-right font-medium text-gray-700">
-                {{ formatCurrency(item.quantity * item.price) }}
+                {{ formatCurrency((item.quantity || 0) * (item.price || 0)) }}
               </td>
               <td class="p-2 text-center print:hidden">
-                <button @click="removeItem(item.id)" class="text-red-400 hover:text-red-600 transition-colors" title="Verwijderen" v-if="invoiceData.items.length > 1">
-                  ✕
+                <button @click="removeItem(item.id)" class="text-red-400 hover:text-red-600 transition-colors font-bold" title="Verwijderen" v-if="invoiceData.items.length > 1">
+                  &times;
                 </button>
               </td>
             </tr>
@@ -306,7 +425,7 @@ const loadInvoice = (invoice) => {
 
       <!-- Totals -->
       <div class="flex justify-end mb-8">
-        <div class="w-80 bg-gray-50 p-6 rounded-xl">
+        <div class="w-full sm:w-80 bg-gray-50 p-6 rounded-xl">
           <div class="flex justify-between mb-2 text-gray-600">
             <span>Subtotaal (excl. BTW):</span>
             <span>{{ formatCurrency(subtotal) }}</span>
@@ -329,14 +448,14 @@ const loadInvoice = (invoice) => {
     </div>
 
     <!-- Action Buttons (Not printed) -->
-    <div class="mx-auto max-w-4xl mt-8 flex justify-end gap-4 print:hidden">
-      <button @click="fetchHistory" class="bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 font-semibold py-3 px-8 rounded-xl shadow-sm transition-colors mr-auto">
+    <div class="mx-auto max-w-4xl mt-8 flex flex-col sm:flex-row justify-end gap-4 print:hidden">
+      <button @click="fetchHistory" class="w-full sm:w-auto bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 font-semibold py-3 px-8 rounded-xl shadow-sm transition-colors sm:mr-auto">
         Factuurgeschiedenis
       </button>
-      <button @click="resetForm" class="bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 font-semibold py-3 px-8 rounded-xl shadow-sm transition-colors">
+      <button @click="resetForm" class="w-full sm:w-auto bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 font-semibold py-3 px-8 rounded-xl shadow-sm transition-colors">
         Nieuwe factuur
       </button>
-      <button @click="openModal" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+      <button @click="openModal" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
         Factuur opslaan
       </button>
     </div>
@@ -417,8 +536,8 @@ const loadInvoice = (invoice) => {
             <button @click="showHistory = false" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
           </div>
           <div class="flex-1 overflow-y-auto p-6 bg-gray-50/50">
-            <div v-if="isLoadingHistory" class="text-center text-gray-500 py-8">Laden... (Завантаження...)</div>
-            <div v-else-if="invoicesHistory.length === 0" class="text-center text-gray-500 py-8">Geen facturen gevonden. (Інвойсів не знайдено)</div>
+            <div v-if="isLoadingHistory" class="text-center text-gray-500 py-8">Laden...</div>
+            <div v-else-if="invoicesHistory.length === 0" class="text-center text-gray-500 py-8">Geen facturen gevonden.</div>
             <div v-else class="flex flex-col gap-3">
               <div v-for="inv in invoicesHistory" :key="inv.id" @click="loadInvoice(inv)" class="p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md cursor-pointer transition-all bg-white group">
                 <div class="flex justify-between items-start mb-2">
@@ -448,10 +567,10 @@ const loadInvoice = (invoice) => {
         <p class="text-sm text-gray-500 mb-6">{{ confirmModal.message }}</p>
         <div class="flex gap-3">
           <button @click="closeConfirm" class="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none transition-colors">
-            Cancel
+            Annuleren
           </button>
           <button @click="confirmAction" class="flex-1 rounded-xl border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none transition-colors">
-            OK
+            Doorgaan
           </button>
         </div>
       </div>
