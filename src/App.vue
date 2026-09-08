@@ -191,8 +191,8 @@ const addItem = () => {
   invoiceData.value.items.push({
     id: Date.now(),
     description: '',
-    quantity: 1,
-    price: 22,
+    quantity: 0,
+    price: 23.5,
     btwRate: 21
   })
 }
