@@ -580,7 +580,7 @@ const loadInvoice = (invoice) => {
         </div>
       </div>
       <!-- Items Table -->
-      <div class="mb-12 print:mb-6 overflow-x-auto md:overflow-visible -mx-6 px-6 md:mx-0 md:px-0">
+      <div class="mb-12 print:mb-6 overflow-x-auto md:overflow-visible">
         <table class="w-full text-left border-collapse min-w-150 md:min-w-full">
           <thead>
             <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
