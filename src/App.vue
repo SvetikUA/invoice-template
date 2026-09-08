@@ -707,104 +707,101 @@ const loadInvoice = (invoice) => {
         Factuur opslaan </button>
     </div>
     <!-- Validation Modal Overlay -->
-    <div v-if="showValidationModal"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden">
-      <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all text-center">
-        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-          <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+    <Teleport to="body">
+      <div v-if="showValidationModal" class="fixed inset-0 z-[100] print:hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showValidationModal = false"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4 pointer-events-none">
+          <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all text-center relative pointer-events-auto">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+              <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Incomplete gegevens</h3>
+            <p class="text-sm text-gray-500 mb-6">Vul alstublieft alle velden in voordat u de factuur opslaat.</p>
+            <button @click="showValidationModal = false" class="w-full inline-flex justify-center rounded-xl border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none sm:text-sm transition-colors">
+              Begrepen 
+            </button>
+          </div>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Incomplete gegevens</h3>
-        <p class="text-sm text-gray-500 mb-6">Vul alstublieft alle velden in voordat u de factuur opslaat.</p>
-        <button @click="showValidationModal = false"
-          class="w-full inline-flex justify-center rounded-xl border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none sm:text-sm transition-colors">
-          Begrepen </button>
       </div>
-    </div>
+    </Teleport>
     <!-- Modal Overlay -->
-    <div v-if="showModal"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 transform transition-all relative">
-        <button @click="showModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Opslaan en verzenden</h2>
-        <p class="text-gray-500 mb-8">Alle acties slaan automatisch een kopie op in de database.</p>
-        <div class="flex flex-col gap-4">
-          <button @click="saveAsPdf" :disabled="isSaving"
-            class="flex items-center justify-between w-full p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors group">
-            <div class="flex items-center gap-3">
-              <div
-                class="bg-blue-100 p-2 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-              </div>
-              <span class="font-medium text-gray-700">Opslaan als PDF</span>
+    <Teleport to="body">
+      <div v-if="showModal" class="fixed inset-0 z-[100] print:hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showModal = false"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4 pointer-events-none">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 transform transition-all relative pointer-events-auto">
+            <button @click="showModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Opslaan en verzenden</h2>
+            <p class="text-gray-500 mb-8">Alle acties slaan automatisch een kopie op in de database.</p>
+            <div class="flex flex-col gap-4">
+              <button @click="saveAsPdf" :disabled="isSaving" class="flex items-center justify-between w-full p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors group">
+                <div class="flex items-center gap-3">
+                  <div class="bg-blue-100 p-2 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                  </div>
+                  <span class="font-medium text-gray-700">Opslaan als PDF</span>
+                </div>
+                <span v-if="isSaving" class="text-sm text-blue-500 animate-pulse">Opslaan...</span>
+              </button>
             </div>
-            <span v-if="isSaving" class="text-sm text-blue-500 animate-pulse">Opslaan...</span>
-          </button>
-
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
     <!-- History Sidebar Overlay -->
-    <div v-if="showHistory" class="fixed inset-0 z-50 overflow-hidden print:hidden">
-      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" @click="showHistory = false"></div>
-      <div class="fixed inset-y-0 right-0 max-w-md w-full flex">
-        <div class="w-full h-full bg-white shadow-2xl flex flex-col">
-          <div class="p-6 border-b flex justify-between items-center bg-gray-50">
-            <h2 class="text-xl font-bold text-gray-800">Factuurgeschiedenis</h2>
-            <button @click="showHistory = false"
-              class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
-          </div>
-          <div class="flex-1 overflow-y-auto p-6 bg-gray-50/50">
-            <div v-if="isLoadingHistory" class="text-center text-gray-500 py-8">Laden...</div>
-            <div v-else-if="invoicesHistory.length === 0" class="text-center text-gray-500 py-8">Geen facturen gevonden.
+    <Teleport to="body">
+      <div v-if="showHistory" class="fixed inset-0 z-[100] overflow-hidden print:hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" @click="showHistory = false"></div>
+        <div class="fixed inset-y-0 right-0 max-w-md w-full flex">
+          <div class="w-full h-full bg-white shadow-2xl flex flex-col">
+            <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+              <h2 class="text-xl font-bold text-gray-800">Factuurgeschiedenis</h2>
+              <button @click="showHistory = false" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
             </div>
-            <div v-else class="flex flex-col gap-3">
-              <div v-for="inv in invoicesHistory" :key="inv.id" @click="loadInvoice(inv)"
-                class="p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md cursor-pointer transition-all bg-white group">
-                <div class="flex justify-between items-start mb-2">
-                  <span class="font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{{
-                    inv.invoice_number || 'N/A' }}</span>
-                  <span class="text-sm font-bold text-green-600">{{ formatCurrency(inv.total) }}</span>
-                </div>
-                <div class="text-sm text-gray-500 flex justify-between">
-                  <span>{{ new Date(inv.created_at).toLocaleDateString('nl-NL') }}</span>
-                  <span class="truncate ml-4 max-w-36">{{ inv.data?.client?.name || 'Onbekend' }}</span>
+            <div class="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+              <div v-if="isLoadingHistory" class="text-center text-gray-500 py-8">Laden...</div>
+              <div v-else-if="invoicesHistory.length === 0" class="text-center text-gray-500 py-8">Geen facturen gevonden.</div>
+              <div v-else class="flex flex-col gap-3">
+                <div v-for="inv in invoicesHistory" :key="inv.id" @click="loadInvoice(inv)" class="p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md cursor-pointer transition-all bg-white group">
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{{ inv.invoice_number || 'N/A' }}</span>
+                    <span class="text-sm font-bold text-green-600">{{ formatCurrency(inv.total) }}</span>
+                  </div>
+                  <div class="text-sm text-gray-500 flex justify-between">
+                    <span>{{ new Date(inv.created_at).toLocaleDateString('nl-NL') }}</span>
+                    <span class="truncate ml-4 max-w-36">{{ inv.data?.client?.name || 'Onbekend' }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
     <!-- Confirm Modal Overlay -->
-    <div v-if="confirmModal.isOpen"
-      class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:hidden">
-      <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all text-center relative">
-        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-          <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ confirmModal.title }}</h3>
-        <p class="text-sm text-gray-500 mb-6">{{ confirmModal.message }}</p>
-        <div class="flex gap-3">
-          <button @click="closeConfirm"
-            class="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none transition-colors">
-            Annuleren </button>
-          <button @click="confirmAction"
-            class="flex-1 rounded-xl border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none transition-colors">
-            Doorgaan </button>
+    <div v-if="confirmModal.isOpen" class="fixed inset-0 z-[100] print:hidden">
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="closeConfirm"></div>
+      <div class="fixed inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all text-center relative pointer-events-auto">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+            <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">{{ confirmModal.title }}</h3>
+          <p class="text-sm text-gray-500 mb-6">{{ confirmModal.message }}</p>
+          <div class="flex gap-3">
+            <button @click="closeConfirm" class="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none transition-colors">Annuleren</button>
+            <button @click="confirmAction" class="flex-1 rounded-xl border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none transition-colors">Doorgaan</button>
+          </div>
         </div>
       </div>
     </div>
