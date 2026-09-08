@@ -168,19 +168,18 @@ const deleteSavedItem = (description) => {
   )
 }
 
-const saveItemsToServer = async () => {
-  for (const item of invoiceData.value.items) {
-    if (!item.description) continue
-    const existingIndex = savedItems.value.findIndex(i => i.description === item.description)
-    if (existingIndex < 0) {
-      const { data } = await supabase.from('saved_items').insert({ description: item.description }).select().single()
-      if (data) {
-        savedItems.value.push(data)
-      } else {
-        savedItems.value.push({ description: item.description })
-      }
+const saveCurrentItemAsTemplate = async (item) => {
+  if (!item.description) return
+  const existingIndex = savedItems.value.findIndex(i => i.description === item.description)
+  if (existingIndex < 0) {
+    const { data } = await supabase.from('saved_items').insert({ description: item.description }).select().single()
+    if (data) {
+      savedItems.value.push(data)
+    } else {
+      savedItems.value.push({ description: item.description })
     }
   }
+  openItemDropdownId.value = null
 }
 
 const fetchServerData = async () => {
@@ -277,7 +276,6 @@ const openModal = () => {
 const saveToSupabase = async () => {
   isSaving.value = true
   await saveClientToServer()
-  await saveItemsToServer()
 
   try {
     const { data: existing, error: fetchError } = await supabase
@@ -562,6 +560,10 @@ const loadInvoice = (invoice) => {
                   </button>
 
                   <div v-if="openItemDropdownId === item.id" class="absolute z-30 w-72 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden left-0 print:hidden">
+                    <button @click.stop="saveCurrentItemAsTemplate(item)" class="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 border-b border-gray-100 transition-colors font-medium flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                      Opslaan als nieuw sjabloon
+                    </button>
                     <div class="max-h-48 overflow-y-auto py-1">
                       <div v-for="si in savedItems" :key="si.description" class="flex items-center justify-between px-2 py-1 hover:bg-blue-50 group transition-colors">
                         <button @click="selectSavedItem(item, si)" class="text-left text-sm text-gray-800 font-medium truncate flex-1 px-2 py-1">{{ si.description }}</button>
