@@ -64,16 +64,31 @@ const generateInvoiceNumber = async () => {
 
 onMounted(() => {
   generateInvoiceNumber()
+  fetchServerData()
 })
 
-// Clients storage in localStorage
-const savedClients = ref(JSON.parse(localStorage.getItem('savedClients') || '[]'))
+const resizeTextarea = (event) => {
+  const el = event.target
+  el.style.height = 'auto'
+  el.style.height = el.scrollHeight + 'px'
+}
+
+// Clients storage on server
+const savedClients = ref([])
 const selectedClientName = ref('')
 
 const selectClient = () => {
   const client = savedClients.value.find(c => c.name === selectedClientName.value)
   if (client) {
-    invoiceData.value.client = { ...client }
+    invoiceData.value.client = { 
+      name: client.name || '',
+      address: client.address || '',
+      kvk: client.kvk || '',
+      vat: client.vat || '',
+      iban: client.iban || '',
+      email: client.email || '',
+      phone: client.phone || ''
+    }
   }
 }
 
@@ -89,30 +104,35 @@ const deleteClient = () => {
   openConfirm(
     'Klant verwijderen',
     'Weet je zeker dat je deze klant wilt verwijderen?',
-    () => {
-      savedClients.value = savedClients.value.filter(c => c.name !== selectedClientName.value)
-      localStorage.setItem('savedClients', JSON.stringify(savedClients.value))
+    async () => {
+      const clientName = selectedClientName.value
+      await supabase.from('clients').delete().eq('name', clientName)
+      savedClients.value = savedClients.value.filter(c => c.name !== clientName)
       selectedClientName.value = ''
       invoiceData.value.client = { name: '', address: '', kvk: '', vat: '', iban: '', email: '', phone: '' }
     }
   )
 }
 
-const saveClientLocally = () => {
+const saveClientToServer = async () => {
   const client = invoiceData.value.client
   if (!client.name) return
 
   const existingIndex = savedClients.value.findIndex(c => c.name === client.name)
+  const clientData = { ...client }
+  
   if (existingIndex >= 0) {
-    savedClients.value[existingIndex] = { ...client }
+    const id = savedClients.value[existingIndex].id
+    if (id) await supabase.from('clients').update(clientData).eq('id', id)
+    savedClients.value[existingIndex] = { ...savedClients.value[existingIndex], ...clientData }
   } else {
-    savedClients.value.push({ ...client })
+    const { data } = await supabase.from('clients').insert(clientData).select().single()
+    if (data) savedClients.value.push(data)
   }
-  localStorage.setItem('savedClients', JSON.stringify(savedClients.value))
 }
 
-// Items storage in localStorage
-const savedItems = ref(JSON.parse(localStorage.getItem('savedItems') || '[]'))
+// Items storage on server
+const savedItems = ref([])
 const openItemDropdownId = ref(null)
 
 const toggleItemDropdown = (id) => {
@@ -128,22 +148,39 @@ const deleteSavedItem = (description) => {
   openConfirm(
     'Dienst verwijderen',
     'Weet je zeker dat je deze dienst wilt verwijderen?',
-    () => {
+    async () => {
+      await supabase.from('saved_items').delete().eq('description', description)
       savedItems.value = savedItems.value.filter(i => i.description !== description)
-      localStorage.setItem('savedItems', JSON.stringify(savedItems.value))
     }
   )
 }
 
-const saveItemsLocally = () => {
-  invoiceData.value.items.forEach(item => {
-    if (!item.description) return
+const saveItemsToServer = async () => {
+  for (const item of invoiceData.value.items) {
+    if (!item.description) continue
     const existingIndex = savedItems.value.findIndex(i => i.description === item.description)
     if (existingIndex < 0) {
-      savedItems.value.push({ description: item.description })
+      const { data } = await supabase.from('saved_items').insert({ description: item.description }).select().single()
+      if (data) {
+        savedItems.value.push(data)
+      } else {
+        savedItems.value.push({ description: item.description })
+      }
     }
-  })
-  localStorage.setItem('savedItems', JSON.stringify(savedItems.value))
+  }
+}
+
+const fetchServerData = async () => {
+  try {
+    const [clientsRes, itemsRes] = await Promise.all([
+      supabase.from('clients').select('*'),
+      supabase.from('saved_items').select('*')
+    ])
+    if (clientsRes.data) savedClients.value = clientsRes.data
+    if (itemsRes.data) savedItems.value = itemsRes.data
+  } catch (error) {
+    console.error('Error fetching server data', error)
+  }
 }
 
 // BTW rates available
@@ -226,8 +263,8 @@ const openModal = () => {
 
 const saveToSupabase = async () => {
   isSaving.value = true
-  saveClientLocally() // Save client to local storage
-  saveItemsLocally() // Save items to local storage
+  await saveClientToServer()
+  await saveItemsToServer()
 
   try {
     const { data, error } = await supabase
@@ -382,32 +419,32 @@ const loadInvoice = (invoice) => {
           <div class="flex flex-col gap-3 print:gap-1">
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-gray-500">Naam:</span>
-              <input v-model="invoiceData.company.name" type="text" placeholder="Bedrijfsnaam / Naam" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.name}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.company.name" type="text" placeholder="Bedrijfsnaam / Naam" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.name}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-start gap-2">
               <span class="text-sm text-gray-500 mt-2 print:mt-1">Adres:</span>
-              <textarea v-model="invoiceData.company.address" placeholder="Volledig adres" rows="2" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.address}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white resize-none"></textarea>
+              <textarea v-model="invoiceData.company.address" @input="resizeTextarea" placeholder="Volledig adres" rows="1" style="overflow: hidden; height: auto;" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.address}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent resize-none min-h-[40px]"></textarea>
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-gray-500">KVK:</span>
-              <input v-model="invoiceData.company.kvk" type="text" placeholder="KVK nummer" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.kvk}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.company.kvk" type="text" placeholder="KVK nummer" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.kvk}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-gray-500">BTW:</span>
-              <input v-model="invoiceData.company.btw" type="text" placeholder="BTW-id" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.btw}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.company.btw" type="text" placeholder="BTW-id" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.btw}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-gray-500">IBAN:</span>
-              <input v-model="invoiceData.company.iban" type="text" placeholder="IBAN" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.iban}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.company.iban" type="text" placeholder="IBAN" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.iban}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.company.phone}">
               <span class="text-sm text-gray-500">Tel:</span>
-              <input v-model="invoiceData.company.phone" type="text" placeholder="Telefoonnummer" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.company.phone" type="text" placeholder="Telefoonnummer" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
           </div>
         </div>
@@ -440,37 +477,37 @@ const loadInvoice = (invoice) => {
           <div class="flex flex-col gap-3 print:gap-1">
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-blue-600/70">Naam:</span>
-              <input v-model="invoiceData.client.name" type="text" placeholder="Naam klant / Bedrijf" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.client.name}" class="w-full border border-blue-200 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.client.name" type="text" placeholder="Naam klant / Bedrijf" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.client.name}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.kvk}">
               <span class="text-sm text-blue-600/70">KVK:</span>
-              <input v-model="invoiceData.client.kvk" type="text" placeholder="KVK-nummer (optioneel)" class="w-full border border-blue-200 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.client.kvk" type="text" placeholder="KVK-nummer (optioneel)" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.vat}">
               <span class="text-sm text-blue-600/70">BTW:</span>
-              <input v-model="invoiceData.client.vat" type="text" placeholder="BTW-nummer (optioneel)" class="w-full border border-blue-200 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.client.vat" type="text" placeholder="BTW-nummer (optioneel)" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.iban}">
               <span class="text-sm text-blue-600/70">IBAN:</span>
-              <input v-model="invoiceData.client.iban" type="text" placeholder="IBAN (optioneel)" class="w-full border border-blue-200 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.client.iban" type="text" placeholder="IBAN (optioneel)" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.email}">
               <span class="text-sm text-blue-600/70">Email:</span>
-              <input v-model="invoiceData.client.email" type="email" placeholder="E-mailadres (optioneel)" class="w-full border border-blue-200 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.client.email" type="email" placeholder="E-mailadres (optioneel)" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.phone}">
               <span class="text-sm text-blue-600/70">Tel:</span>
-              <input v-model="invoiceData.client.phone" type="text" placeholder="Telefoonnummer (optioneel)" class="w-full border border-blue-200 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.client.phone" type="text" placeholder="Telefoonnummer (optioneel)" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-start gap-2" :class="{'print:hidden': !invoiceData.client.address}">
               <span class="text-sm text-blue-600/70 mt-2 print:mt-1">Adres:</span>
-              <textarea v-model="invoiceData.client.address" placeholder="Volledig adres (optioneel)" rows="2" class="w-full border border-blue-200 rounded px-3 py-2 print:py-1 bg-white resize-none"></textarea>
+              <textarea v-model="invoiceData.client.address" @input="resizeTextarea" placeholder="Volledig adres (optioneel)" rows="1" style="overflow: hidden; height: auto;" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent resize-none min-h-[40px]"></textarea>
             </div>
           </div>
         </div>
