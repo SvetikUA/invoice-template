@@ -439,8 +439,8 @@ const loadInvoice = (invoice) => {
 
       <!-- Addresses -->
       <div class="flex flex-col md:flex-row print:flex-row justify-between gap-6 md:gap-12 mb-12 print:mb-6">
-        <div class="flex-1 bg-gray-50 p-4 md:p-6 print:p-2 print:bg-transparent rounded-xl">
-          <h3 class="text-lg font-semibold text-gray-700 mb-4 print:mb-2 border-b pb-2">Van (ZZP)</h3>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-gray-700 mb-4 print:mb-2 border-b border-gray-200 pb-2">Van (ZZP)</h3>
           <div class="flex flex-col gap-3 print:gap-1">
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-gray-500">Naam:</span>
@@ -474,12 +474,12 @@ const loadInvoice = (invoice) => {
           </div>
         </div>
 
-        <div class="flex-1 bg-blue-50 p-6 print:p-2 print:bg-transparent rounded-xl">
-          <div class="flex justify-between items-center border-b border-blue-200 pb-2 mb-4 print:mb-2 relative">
-            <h3 class="text-lg font-semibold text-blue-800">Aan (Klant)</h3>
+        <div class="flex-1 relative">
+          <div class="flex justify-between items-center border-b border-gray-200 pb-2 mb-4 print:mb-2 relative">
+            <h3 class="text-lg font-semibold text-gray-700">Aan (Klant)</h3>
             <div class="print:hidden" v-if="savedClients.length > 0">
               <div class="flex items-center gap-1">
-                <button @click="isClientDropdownOpen = !isClientDropdownOpen" type="button" class="relative z-20 flex items-center justify-between w-40 bg-white border border-blue-300 rounded-lg px-3 py-1.5 text-sm text-blue-800 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-sm">
+                <button @click="isClientDropdownOpen = !isClientDropdownOpen" type="button" class="relative z-20 flex items-center justify-between w-40 bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all shadow-sm">
                   <span class="truncate font-medium">{{ selectedClientName || 'Kies klant...' }}</span>
                   <svg class="w-4 h-4 ml-1 opacity-70 transition-transform duration-200" :class="{'rotate-180': isClientDropdownOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                 </button>
@@ -488,10 +488,10 @@ const loadInvoice = (invoice) => {
                 </button>
               </div>
 
-              <div v-if="isClientDropdownOpen" class="absolute right-8 top-12 md:top-8 z-30 w-48 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
+              <div v-if="isClientDropdownOpen" class="absolute right-0 top-10 z-30 w-48 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
                 <div class="max-h-48 overflow-y-auto py-1">
                   <button @click="selectCustomClient('')" class="w-full text-left px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 transition-colors italic">Kies klant...</button>
-                  <button v-for="c in savedClients" :key="c.name" @click="selectCustomClient(c.name)" class="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-blue-50 hover:text-blue-700 transition-colors font-medium">
+                  <button v-for="c in savedClients" :key="c.name" @click="selectCustomClient(c.name)" class="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-50 transition-colors font-medium">
                     {{ c.name }}
                   </button>
                 </div>
@@ -501,37 +501,37 @@ const loadInvoice = (invoice) => {
           </div>
           <div class="flex flex-col gap-3 print:gap-1">
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
-              <span class="text-sm text-blue-600/70">Naam:</span>
+              <span class="text-sm text-gray-500">Naam:</span>
               <input v-model="invoiceData.client.name" type="text" placeholder="Naam klant / Bedrijf" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.client.name}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.kvk}">
-              <span class="text-sm text-blue-600/70">KVK:</span>
+              <span class="text-sm text-gray-500">KVK:</span>
               <input v-model="invoiceData.client.kvk" type="text" placeholder="KVK-nummer (optioneel)" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.vat}">
-              <span class="text-sm text-blue-600/70">BTW:</span>
+              <span class="text-sm text-gray-500">BTW:</span>
               <input v-model="invoiceData.client.vat" type="text" placeholder="BTW-nummer (optioneel)" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.iban}">
-              <span class="text-sm text-blue-600/70">IBAN:</span>
+              <span class="text-sm text-gray-500">IBAN:</span>
               <input v-model="invoiceData.client.iban" type="text" placeholder="IBAN (optioneel)" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.email}">
-              <span class="text-sm text-blue-600/70">Email:</span>
+              <span class="text-sm text-gray-500">Email:</span>
               <input v-model="invoiceData.client.email" type="email" placeholder="E-mailadres (optioneel)" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.phone}">
-              <span class="text-sm text-blue-600/70">Tel:</span>
+              <span class="text-sm text-gray-500">Tel:</span>
               <input v-model="invoiceData.client.phone" type="text" placeholder="Telefoonnummer (optioneel)" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-start gap-2" :class="{'print:hidden': !invoiceData.client.address}">
-              <span class="text-sm text-blue-600/70 mt-2 print:mt-1">Adres:</span>
+              <span class="text-sm text-gray-500 mt-2 print:mt-1">Adres:</span>
               <textarea v-model="invoiceData.client.address" @input="resizeTextarea" placeholder="Volledig adres (optioneel)" rows="1" style="overflow: hidden; height: auto;" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent resize-none min-h-[40px]"></textarea>
             </div>
           </div>
