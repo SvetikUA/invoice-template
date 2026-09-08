@@ -329,13 +329,6 @@ const saveAsPdf = async () => {
   }, 300)
 }
 
-const sendToEmail = async () => {
-  await saveToSupabase()
-  const subject = encodeURIComponent(`Factuur ${invoiceData.value.invoiceNumber}`)
-  const body = encodeURIComponent(`Beste klant,\n\nHierbij stuur ik u de factuur ${invoiceData.value.invoiceNumber} voor een bedrag van ${formatCurrency(grandTotal.value)}.\n\nMet vriendelijke groet,\n${invoiceData.value.company.name}`)
-  window.location.href = `mailto:?subject=${subject}&body=${body}`
-  showModal.value = false
-}
 
 const confirmModal = ref({
   isOpen: false,
@@ -757,20 +750,7 @@ const loadInvoice = (invoice) => {
             </div>
             <span v-if="isSaving" class="text-sm text-blue-500 animate-pulse">Opslaan...</span>
           </button>
-          <button @click="sendToEmail" :disabled="isSaving"
-            class="flex items-center justify-between w-full p-4 border border-gray-200 rounded-xl hover:border-green-500 hover:bg-green-50 transition-colors group">
-            <div class="flex items-center gap-3">
-              <div
-                class="bg-green-100 p-2 rounded-lg text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <span class="font-medium text-gray-700">Versturen via e-mail</span>
-            </div>
-          </button>
+
         </div>
       </div>
     </div>
