@@ -363,11 +363,11 @@ const loadInvoice = (invoice) => {
           <div class="mt-4 print:mt-2 flex flex-col gap-3 md:gap-2 print:gap-1">
             <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
               <span class="text-gray-500 w-32 font-medium sm:font-normal">Factuurnummer:</span>
-              <input v-model="invoiceData.invoiceNumber" type="text" placeholder="INV-2023-001" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.invoiceNumber}" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
+              <input v-model="invoiceData.invoiceNumber" type="text" placeholder="INV-2023-001" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.invoiceNumber}" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
               <span class="text-gray-500 w-32 font-medium sm:font-normal">Factuurdatum:</span>
-              <input v-model="invoiceData.date" type="date" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.date}" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
+              <input v-model="invoiceData.date" type="date" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.date}" class="border border-gray-300 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
             </div>
             <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
               <span class="text-gray-500 w-32 font-medium sm:font-normal">Vervaldatum:</span>
@@ -388,27 +388,27 @@ const loadInvoice = (invoice) => {
           <div class="flex flex-col gap-3 print:gap-1">
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-gray-500">Naam:</span>
-              <input v-model="invoiceData.company.name" type="text" placeholder="Bedrijfsnaam / Naam" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.company.name}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.company.name" type="text" placeholder="Bedrijfsnaam / Naam" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.name}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-start gap-2">
               <span class="text-sm text-gray-500 mt-2 print:mt-1">Adres:</span>
-              <textarea v-model="invoiceData.company.address" placeholder="Volledig adres" rows="2" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.company.address}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white resize-none"></textarea>
+              <textarea v-model="invoiceData.company.address" placeholder="Volledig adres" rows="2" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.address}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white resize-none"></textarea>
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-gray-500">KVK:</span>
-              <input v-model="invoiceData.company.kvk" type="text" placeholder="KVK nummer" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.company.kvk}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.company.kvk" type="text" placeholder="KVK nummer" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.kvk}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-gray-500">BTW:</span>
-              <input v-model="invoiceData.company.btw" type="text" placeholder="BTW-id" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.company.btw}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.company.btw" type="text" placeholder="BTW-id" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.btw}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-gray-500">IBAN:</span>
-              <input v-model="invoiceData.company.iban" type="text" placeholder="IBAN" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.company.iban}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.company.iban" type="text" placeholder="IBAN" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.iban}" class="w-full border border-gray-300 rounded px-3 py-2 print:py-1 bg-white" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.company.phone}">
@@ -446,7 +446,7 @@ const loadInvoice = (invoice) => {
           <div class="flex flex-col gap-3 print:gap-1">
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
               <span class="text-sm text-blue-600/70">Naam:</span>
-              <input v-model="invoiceData.client.name" type="text" placeholder="Naam klant / Bedrijf" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !invoiceData.client.name}" class="w-full border border-blue-200 rounded px-3 py-2 print:py-1 bg-white" />
+              <input v-model="invoiceData.client.name" type="text" placeholder="Naam klant / Bedrijf" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.client.name}" class="w-full border border-blue-200 rounded px-3 py-2 print:py-1 bg-white" />
             </div>
 
             <div class="grid grid-cols-[50px_1fr] items-center gap-2" :class="{'print:hidden': !invoiceData.client.kvk}">
@@ -500,7 +500,7 @@ const loadInvoice = (invoice) => {
             <tr v-for="item in invoiceData.items" :key="item.id" class="border-b border-gray-100 hover:bg-gray-50 transition-colors print:text-sm relative">
               <td class="p-2 relative">
                 <div class="relative w-full">
-                  <input v-model="item.description" type="text" placeholder="Omschrijving" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && !item.description}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 print:py-0 bg-transparent pr-8" />
+                  <input v-model="item.description" type="text" placeholder="Omschrijving" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && !item.description}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 print:py-0 bg-transparent pr-8" />
                   <button @click="toggleItemDropdown(item.id)" class="absolute right-1 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 p-1 print:hidden" title="Opgeslagen diensten">
                     <svg class="w-4 h-4 transition-transform duration-200" :class="{'rotate-180': openItemDropdownId === item.id}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                   </button>
@@ -520,12 +520,12 @@ const loadInvoice = (invoice) => {
                 <div v-if="openItemDropdownId === item.id" @click="openItemDropdownId = null" class="fixed inset-0 z-20 print:hidden"></div>
               </td>
               <td class="p-2">
-                <input v-model.number="item.quantity" type="number" min="1" step="0.1" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && (!item.quantity || item.quantity <= 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
+                <input v-model.number="item.quantity" type="number" min="1" step="0.1" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && (!item.quantity || item.quantity <= 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
               </td>
               <td class="p-2">
                 <div class="relative w-full flex items-center">
                   <span class="absolute left-2 text-gray-500 font-medium">€</span>
-                  <input v-model.number="item.price" type="number" min="0" step="0.01" placeholder="22" :class="{'!border-red-500 !ring-2 !ring-red-200': showErrors && (item.price === '' || item.price < 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded pl-6 pr-2 py-1 bg-transparent" />
+                  <input v-model.number="item.price" type="number" min="0" step="0.01" placeholder="22" :class="{'border-red-500! ring-2! ring-red-200!': showErrors && (item.price === '' || item.price < 0)}" class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded pl-6 pr-2 py-1 bg-transparent" />
                 </div>
               </td>
               <td class="p-2">
@@ -674,7 +674,7 @@ const loadInvoice = (invoice) => {
                 </div>
                 <div class="text-sm text-gray-500 flex justify-between">
                   <span>{{ new Date(inv.created_at).toLocaleDateString('nl-NL') }}</span>
-                  <span class="truncate ml-4 max-w-[150px]">{{ inv.data?.client?.name || 'Onbekend' }}</span>
+                  <span class="truncate ml-4 max-w-36">{{ inv.data?.client?.name || 'Onbekend' }}</span>
                 </div>
               </div>
             </div>
