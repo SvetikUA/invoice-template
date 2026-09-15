@@ -450,45 +450,45 @@ const loadInvoice = (invoice) => {
       <div class="flex flex-col md:flex-row print:flex-row justify-between gap-6 md:gap-12 mb-12 print:mb-6">
         <div class="flex-1">
           <h3 class="text-lg font-semibold text-gray-700 mb-4 print:mb-2 border-b border-gray-200 pb-2">Van (ZZP)</h3>
-          <div class="flex flex-col gap-3 print:gap-1">
+          <div class="flex flex-col gap-1 print:gap-0">
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
-              <span class="text-sm text-gray-500">Naam:</span>
+              <span class="text-xs text-gray-500">Naam:</span>
               <input v-model="invoiceData.company.name" type="text" placeholder="Bedrijfsnaam / Naam"
                 :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.name }"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
             <div class="grid grid-cols-[50px_1fr] items-start gap-2">
-              <span class="text-sm text-gray-500 mt-2 print:mt-1">Adres:</span>
-              <div class="w-full px-3 py-2 print:py-1 hidden print:block whitespace-pre-wrap">{{
+              <span class="text-xs text-gray-500 mt-1.5 print:mt-1">Adres:</span>
+              <div class="w-full px-2 py-1 text-sm print:py-0.5 hidden print:block whitespace-pre-wrap">{{
                 invoiceData.company.address }}</div>
               <textarea v-model="invoiceData.company.address" @input="resizeTextarea" placeholder="Volledig adres"
                 rows="1" style="overflow: hidden; height: auto;"
                 :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.address }"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:hidden bg-transparent resize-none min-h-10"></textarea>
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:hidden bg-transparent resize-none min-h-8"></textarea>
             </div>
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
-              <span class="text-sm text-gray-500">KVK:</span>
+              <span class="text-xs text-gray-500">KVK:</span>
               <input v-model="invoiceData.company.kvk" type="text" placeholder="KVK nummer"
                 :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.kvk }"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
-              <span class="text-sm text-gray-500">BTW:</span>
+              <span class="text-xs text-gray-500">BTW:</span>
               <input v-model="invoiceData.company.btw" type="text" placeholder="BTW-id"
                 :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.btw }"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
-              <span class="text-sm text-gray-500">IBAN:</span>
+              <span class="text-xs text-gray-500">IBAN:</span>
               <input v-model="invoiceData.company.iban" type="text" placeholder="IBAN"
                 :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.company.iban }"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
             <div class="grid grid-cols-[50px_1fr] items-center gap-2"
               :class="{ 'print:hidden': !invoiceData.company.phone }">
-              <span class="text-sm text-gray-500">Tel:</span>
+              <span class="text-xs text-gray-500">Tel:</span>
               <input v-model="invoiceData.company.phone" type="text" placeholder="Telefoonnummer"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
           </div>
         </div>
@@ -530,51 +530,51 @@ const loadInvoice = (invoice) => {
               <div v-if="isClientDropdownOpen" @click="isClientDropdownOpen = false" class="fixed inset-0 z-10"></div>
             </div>
           </div>
-          <div class="flex flex-col gap-3 print:gap-1">
+          <div class="flex flex-col gap-1 print:gap-0">
             <div class="grid grid-cols-[50px_1fr] items-center gap-2">
-              <span class="text-sm text-gray-500">Naam:</span>
+              <span class="text-xs text-gray-500">Naam:</span>
               <input v-model="invoiceData.client.name" type="text" placeholder="Naam klant / Bedrijf"
                 :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.client.name }"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
             <div class="grid grid-cols-[50px_1fr] items-center gap-2"
               :class="{ 'print:hidden': !invoiceData.client.kvk }">
-              <span class="text-sm text-gray-500">KVK:</span>
+              <span class="text-xs text-gray-500">KVK:</span>
               <input v-model="invoiceData.client.kvk" type="text" placeholder="KVK-nummer (optioneel)"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
             <div class="grid grid-cols-[50px_1fr] items-center gap-2"
               :class="{ 'print:hidden': !invoiceData.client.vat }">
-              <span class="text-sm text-gray-500">BTW:</span>
+              <span class="text-xs text-gray-500">BTW:</span>
               <input v-model="invoiceData.client.vat" type="text" placeholder="BTW-nummer (optioneel)"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
             <div class="grid grid-cols-[50px_1fr] items-center gap-2"
               :class="{ 'print:hidden': !invoiceData.client.iban }">
-              <span class="text-sm text-gray-500">IBAN:</span>
+              <span class="text-xs text-gray-500">IBAN:</span>
               <input v-model="invoiceData.client.iban" type="text" placeholder="IBAN (optioneel)"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
             <div class="grid grid-cols-[50px_1fr] items-center gap-2"
               :class="{ 'print:hidden': !invoiceData.client.email }">
-              <span class="text-sm text-gray-500">Email:</span>
+              <span class="text-xs text-gray-500">Email:</span>
               <input v-model="invoiceData.client.email" type="email" placeholder="E-mailadres (optioneel)"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
             <div class="grid grid-cols-[50px_1fr] items-center gap-2"
               :class="{ 'print:hidden': !invoiceData.client.phone }">
-              <span class="text-sm text-gray-500">Tel:</span>
+              <span class="text-xs text-gray-500">Tel:</span>
               <input v-model="invoiceData.client.phone" type="text" placeholder="Telefoonnummer (optioneel)"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:py-1 bg-transparent" />
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:py-0.5 bg-transparent" />
             </div>
             <div class="grid grid-cols-[50px_1fr] items-start gap-2"
               :class="{ 'print:hidden': !invoiceData.client.address }">
-              <span class="text-sm text-gray-500 mt-2 print:mt-1">Adres:</span>
-              <div class="w-full px-3 py-2 print:py-1 hidden print:block whitespace-pre-wrap">{{
+              <span class="text-xs text-gray-500 mt-1.5 print:mt-1">Adres:</span>
+              <div class="w-full px-2 py-1 text-sm print:py-0.5 hidden print:block whitespace-pre-wrap">{{
                 invoiceData.client.address }}</div>
               <textarea v-model="invoiceData.client.address" @input="resizeTextarea"
                 placeholder="Volledig adres (optioneel)" rows="1" style="overflow: hidden; height: auto;"
-                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-3 py-2 print:hidden bg-transparent resize-none min-h-10"></textarea>
+                class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 text-sm print:hidden bg-transparent resize-none min-h-8"></textarea>
             </div>
           </div>
         </div>
