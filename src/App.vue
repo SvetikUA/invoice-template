@@ -428,32 +428,32 @@ const deleteInvoice = (id) => {
         class="flex flex-col md:flex-row justify-between items-start border-b border-gray-200 pb-8 mb-8 print:pb-4 print:mb-6 gap-6">
         <div class="w-full">
           <h1 class="text-4xl print:text-2xl font-bold text-gray-800 tracking-tight">Factuur</h1>
-          <div class="mt-4 print:mt-2 flex flex-col gap-3 md:gap-2 print:gap-1">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-              <span class="text-gray-500 w-32 font-medium sm:font-normal">Factuurnummer:</span>
+          <div class="mt-4 print:mt-2 flex flex-col gap-1 print:gap-0">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <span class="text-xs text-gray-500 w-28 font-medium sm:font-normal">Factuurnummer:</span>
               <input v-model="invoiceData.invoiceNumber" type="text" placeholder="INV-2023-001"
                 :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.invoiceNumber }"
-                class="focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none" />
+                class="focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 sm:flex-none text-sm px-1 py-0.5 print:p-0 bg-transparent rounded hover:bg-gray-50 transition-colors" />
             </div>
-            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-              <span class="text-gray-500 w-32 font-medium sm:font-normal">Factuurdatum:</span>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <span class="text-xs text-gray-500 w-28 font-medium sm:font-normal">Factuurdatum:</span>
               <div class="relative flex-1 sm:flex-none flex items-center max-w-fit">
                 <input v-model="invoiceData.date" type="date"
                   :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && !invoiceData.date }"
-                  class="focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-transparent pr-7 z-10" />
-                <svg class="w-4 h-4 text-gray-400 absolute right-1 z-0 pointer-events-none" fill="none"
+                  class="focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-transparent pr-7 z-10 text-sm px-1 py-0.5 print:p-0 rounded hover:bg-gray-50 transition-colors" />
+                <svg class="w-4 h-4 text-gray-400 absolute right-1 z-0 pointer-events-none print:hidden" fill="none"
                   stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
               </div>
             </div>
-            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-              <span class="text-gray-500 w-32 font-medium sm:font-normal">Vervaldatum:</span>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <span class="text-xs text-gray-500 w-28 font-medium sm:font-normal">Vervaldatum:</span>
               <div class="relative flex-1 sm:flex-none flex items-center max-w-fit">
                 <input v-model="invoiceData.dueDate" type="date"
-                  class="focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-transparent pr-7 z-10" />
-                <svg class="w-4 h-4 text-gray-400 absolute right-1 z-0 pointer-events-none" fill="none"
+                  class="focus:outline-none focus:ring-2 focus:ring-blue-500 w-full bg-transparent pr-7 z-10 text-sm px-1 py-0.5 print:p-0 rounded hover:bg-gray-50 transition-colors" />
+                <svg class="w-4 h-4 text-gray-400 absolute right-1 z-0 pointer-events-none print:hidden" fill="none"
                   stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
