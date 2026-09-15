@@ -400,6 +400,23 @@ const loadInvoice = (invoice) => {
     }
   )
 }
+
+const deleteInvoice = (id) => {
+  openConfirm(
+    'Factuur verwijderen',
+    'Weet je zeker dat je deze factuur wilt verwijderen?',
+    async () => {
+      try {
+        const { error } = await supabase.from('invoices').delete().eq('id', id)
+        if (error) throw error
+        invoicesHistory.value = invoicesHistory.value.filter(inv => inv.id !== id)
+      } catch (error) {
+        console.error('Error deleting invoice:', error)
+        alert('Fout bij verwijderen: ' + error.message)
+      }
+    }
+  )
+}
 </script>
 <template>
   <div class="min-h-screen bg-gray-100 p-4 md:p-8 print:p-0 print:bg-white font-sans text-gray-900">
@@ -581,21 +598,21 @@ const loadInvoice = (invoice) => {
       </div>
       <!-- Items Table -->
       <div class="mb-12 print:mb-6 overflow-x-auto md:overflow-visible">
-        <table class="w-full text-left border-collapse min-w-150 md:min-w-full">
+        <table class="w-full text-left border-collapse min-w-150 print:min-w-0 md:min-w-full">
           <thead>
-            <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
-              <th class="p-4 rounded-tl-lg">Omschrijving</th>
-              <th class="p-4 w-24">Aantal</th>
-              <th class="p-4 w-32">Prijs (ex. BTW)</th>
-              <th class="p-4 w-24">BTW %</th>
-              <th class="p-4 rounded-tr-lg text-right">Bedrag</th>
+            <tr class="bg-gray-100 text-gray-700 text-xs print:text-[10px] uppercase tracking-wider">
+              <th class="p-4 print:p-2 rounded-tl-lg">Omschrijving</th>
+              <th class="p-4 print:p-2 w-24">Aantal</th>
+              <th class="p-4 print:p-2 w-32">Prijs (ex. BTW)</th>
+              <th class="p-4 print:p-2 w-24">BTW %</th>
+              <th class="p-4 print:p-2 rounded-tr-lg text-right">Bedrag</th>
               <th class="p-4 w-12 print:hidden"></th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="item in invoiceData.items" :key="item.id"
-              class="border-b border-gray-100 hover:bg-gray-50 transition-colors print:text-sm relative">
-              <td class="p-2 relative">
+              class="border-b border-gray-100 hover:bg-gray-50 transition-colors print:text-xs relative">
+              <td class="p-2 md:p-4 print:p-1 relative">
                 <div class="relative w-full">
                   <input v-model="item.description" type="text" placeholder="Omschrijving"
                     :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && !item.description }"
@@ -642,26 +659,31 @@ const loadInvoice = (invoice) => {
                 <div v-if="openItemDropdownId === item.id" @click="openItemDropdownId = null"
                   class="fixed inset-0 z-40 bg-black/50 md:bg-transparent print:hidden"></div>
               </td>
-              <td class="p-2">
+              <td class="p-2 md:p-4 print:p-1 align-top">
                 <input v-model.number="item.quantity" type="number" min="1" step="0.1"
                   :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && (!item.quantity || item.quantity <= 0) }"
-                  class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent" />
+                  class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 print:p-0 bg-transparent text-gray-800" />
               </td>
-              <td class="p-2">
+              <td class="p-2 md:p-4 print:p-1 align-top relative group">
                 <div class="relative w-full flex items-center">
-                  <span class="absolute left-2 text-gray-500 font-medium">€</span>
+                  <span class="absolute left-2 text-gray-500 print:left-1 font-medium">€</span>
                   <input v-model.number="item.price" type="number" min="0" step="0.01" placeholder="23,5"
                     :class="{ 'border-red-500! ring-2! ring-red-200!': showErrors && (item.price === '' || item.price < 0) }"
-                    class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded pl-6 pr-2 py-1 bg-transparent" />
+                    class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded pl-6 pr-2 py-1 print:pl-4 print:pr-0 print:py-0 bg-transparent text-gray-800" />
                 </div>
               </td>
-              <td class="p-2">
+              <td class="p-2 md:p-4 print:p-1 align-top relative">
                 <select v-model.number="item.btwRate"
-                  class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 bg-transparent">
+                  class="w-full border border-transparent hover:border-gray-300 focus:border-blue-500 rounded px-2 py-1 print:p-0 bg-transparent text-gray-800 appearance-none cursor-pointer">
                   <option v-for="rate in btwRates" :key="rate" :value="rate">{{ rate }}%</option>
                 </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 print:hidden text-gray-500">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                  </svg>
+                </div>
               </td>
-              <td class="p-2 text-right font-medium text-gray-700"> {{ formatCurrency((item.quantity || 0) * (item.price
+              <td class="p-2 md:p-4 print:p-1 text-right align-top font-medium text-gray-800 pt-3 md:pt-5 print:pt-1 whitespace-nowrap"> {{ formatCurrency((item.quantity || 0) * (item.price
                 || 0)) }} </td>
               <td class="p-2 text-center print:hidden">
                 <button @click="removeItem(item.id)" class="text-red-400 hover:text-red-600 transition-colors font-bold"
@@ -770,15 +792,20 @@ const loadInvoice = (invoice) => {
               <div v-if="isLoadingHistory" class="text-center text-gray-500 py-8">Laden...</div>
               <div v-else-if="invoicesHistory.length === 0" class="text-center text-gray-500 py-8">Geen facturen gevonden.</div>
               <div v-else class="flex flex-col gap-3">
-                <div v-for="inv in invoicesHistory" :key="inv.id" @click="loadInvoice(inv)" class="p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md cursor-pointer transition-all bg-white group">
-                  <div class="flex justify-between items-start mb-2">
+                <div v-for="inv in invoicesHistory" :key="inv.id" class="relative group p-4 border border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md cursor-pointer transition-all bg-white" @click="loadInvoice(inv)">
+                  <div class="flex justify-between items-start mb-2 pr-8">
                     <span class="font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{{ inv.invoice_number || 'N/A' }}</span>
                     <span class="text-sm font-bold text-green-600">{{ formatCurrency(inv.total) }}</span>
                   </div>
-                  <div class="text-sm text-gray-500 flex justify-between">
+                  <div class="text-sm text-gray-500 flex justify-between pr-8">
                     <span>{{ new Date(inv.created_at).toLocaleDateString('nl-NL') }}</span>
                     <span class="truncate ml-4 max-w-36">{{ inv.data?.client?.name || 'Onbekend' }}</span>
                   </div>
+                  <button @click.stop="deleteInvoice(inv.id)" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-red-400 hover:text-red-600 transition-colors bg-white rounded-lg hover:bg-red-50 shadow-sm border border-gray-100" title="Verwijderen">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
