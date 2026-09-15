@@ -391,12 +391,12 @@ const fetchHistory = async () => {
 }
 
 const loadInvoice = (invoice) => {
+  showHistory.value = false // Close history sidebar immediately
   openConfirm(
     'Oude factuur laden',
     'Huidige gegevens worden overschreven. Doorgaan?',
     () => {
       invoiceData.value = JSON.parse(JSON.stringify(invoice.data))
-      showHistory.value = false
     }
   )
 }
@@ -675,7 +675,7 @@ const loadInvoice = (invoice) => {
           <span class="text-lg">+</span> Regel toevoegen </button>
       </div>
       <!-- Totals -->
-      <div class="flex justify-end mb-8 print:mb-4 relative z-0">
+      <div class="flex justify-end mb-8 print:mb-4 relative z-0 break-inside-avoid">
         <div class="w-full sm:w-80 bg-gray-50 p-6 rounded-xl">
           <div class="flex justify-between mb-2 text-gray-600">
             <span>Subtotaal (excl. BTW):</span>

@@ -25,3 +25,21 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 button, select, [role="button"], input[type="file"], input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer !important;
 }
+
+@media print {
+  @page {
+    /* Removes default browser headers (URL, Date) and footers (Page numbers) */
+    margin: 0;
+  }
+  
+  body {
+    /* Re-add padding so the invoice isn't stuck to the very edge of the paper */
+    padding: 1cm;
+  }
+
+  /* Prevent elements like total blocks from breaking across pages */
+  .break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
