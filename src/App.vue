@@ -419,7 +419,7 @@ const deleteInvoice = (id) => {
 }
 </script>
 <template>
-  <div class="min-h-screen bg-gray-100 p-4 md:p-8 print:p-0 print:bg-white font-sans text-gray-900">
+  <div class="min-h-screen print:min-h-0 bg-gray-100 p-4 md:p-8 print:p-0 print:bg-white font-sans text-gray-900">
     <!-- Invoice Container -->
     <div class="mx-auto max-w-4xl bg-white p-4 md:p-12 print:p-0 print:shadow-none shadow-xl rounded-2xl relative"
       id="invoice-document">
@@ -814,23 +814,25 @@ const deleteInvoice = (id) => {
       </div>
     </Teleport>
     <!-- Confirm Modal Overlay -->
-    <div v-if="confirmModal.isOpen" class="fixed inset-0 z-[100] print:hidden">
-      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="closeConfirm"></div>
-      <div class="fixed inset-0 flex items-center justify-center p-4 pointer-events-none">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all text-center relative pointer-events-auto">
-          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-            <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">{{ confirmModal.title }}</h3>
-          <p class="text-sm text-gray-500 mb-6">{{ confirmModal.message }}</p>
-          <div class="flex gap-3">
-            <button @click="closeConfirm" class="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none transition-colors">Annuleren</button>
-            <button @click="confirmAction" class="flex-1 rounded-xl border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none transition-colors">Doorgaan</button>
+    <Teleport to="body">
+      <div v-if="confirmModal.isOpen" class="fixed inset-0 z-[200] print:hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="closeConfirm"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4 pointer-events-none">
+          <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all text-center relative pointer-events-auto">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+              <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">{{ confirmModal.title }}</h3>
+            <p class="text-sm text-gray-500 mb-6">{{ confirmModal.message }}</p>
+            <div class="flex gap-3">
+              <button @click="closeConfirm" class="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none transition-colors">Annuleren</button>
+              <button @click="confirmAction" class="flex-1 rounded-xl border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none transition-colors">Doorgaan</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
